@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using TodoApi.Models;
 using TodoAPI.Models;
 
@@ -12,10 +10,6 @@ namespace TodoApi.Controllers
     [ApiController]
     public class TodoController : ControllerBase
     {
-
-        private static readonly HttpClient _client = new HttpClient();
-        private static readonly string _remoteUrl = "https://myFirstAzureWebApp1234.azurewebsites.net";
-
         private readonly TodoContext _context;
 
         public TodoController(TodoContext context)
@@ -34,37 +28,58 @@ namespace TodoApi.Controllers
         [HttpGet]
         public ActionResult<List<TodoItem>> GetAll()
         {
-            var data = _client.GetStringAsync($"{_remoteUrl}/api/Todo").Result;
-            return JsonConvert.DeserializeObject<List<TodoItem>>(data);
+            return _context.TodoItems.ToList();
         }
 
         [HttpGet("{id}", Name = "GetTodo")]
         public ActionResult<TodoItem> GetById(long id)
         {
-            var data = _client.GetStringAsync($"{_remoteUrl}/api/Todo/{id}").Result;
-            return Content(data, "application/json");
+            var item = _context.TodoItems.Find(id);
+            if (item == null)
+            {
+                return NotFound();
+            }
+            return item;
         }
 
         [HttpPost]
         public IActionResult Create(TodoItem item)
         {
-            var response = _client.PostAsJsonAsync($"{_remoteUrl}/api/Todo", item).Result;
-            var data = response.Content.ReadAsStringAsync().Result;
-            return Content(data, "application/json");
+            _context.TodoItems.Add(item);
+            _context.SaveChanges();
+
+            return CreatedAtRoute("GetTodo", new { id = item.Id }, item);
         }
 
         [HttpPut("{id}")]
         public IActionResult Update(long id, TodoItem item)
         {
-            var res = _client.PutAsJsonAsync($"{_remoteUrl}/api/Todo/{id}", item).Result;
-            return new NoContentResult();
+            var todo = _context.TodoItems.Find(id);
+            if (todo == null)
+            {
+                return NotFound();
+            }
+
+            todo.IsComplete = item.IsComplete;
+            todo.name = item.name;
+
+            _context.TodoItems.Update(todo);
+            _context.SaveChanges();
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(long id)
         {
-            var res = _client.DeleteAsync($"{_remoteUrl}/api/Todo/{id}").Result;
-            return new NoContentResult();
+            var todo = _context.TodoItems.Find(id);
+            if (todo == null)
+            {
+                return NotFound();
+            }
+
+            _context.TodoItems.Remove(todo);
+            _context.SaveChanges();
+            return NoContent();
         }
     }
 }
