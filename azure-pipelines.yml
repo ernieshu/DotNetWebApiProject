@@ -13,6 +13,7 @@ steps:
 # TODO add a test phase in here!
 - script: |
      dotnet build --configuration $(buildConfiguration)
+     dotnet publish --configuration $(buildConfiguration) --output $BUILD_ARTIFACTSTAGINGDIRECTORY
   displayName: 'dotnet build $(buildConfiguration)'
   
 # publish a web project
