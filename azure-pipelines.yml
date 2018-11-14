@@ -37,4 +37,4 @@ steps:
   inputs:
     azureSubscription: 'AzureRMConnection'
     WebAppName: 'myfirstazurewebapp1234'
-    Package: $(System.ArtifactsDirectory)/**/*.zip
+    Package: $(Build.ArtifactStagingDirectory)/**/*.zip
