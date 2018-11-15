@@ -33,6 +33,7 @@ steps:
     arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
     zipAfterPublish: True
 
+# FIXME - not getting the artifact in this step
 - task: AzureRmWebAppDeployment@3
   inputs:
     azureSubscription: 'AzureRMConnection'
